@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["Sum Proxy <sum.proxy@gmail.com>"]
 
 [dependencies]
-gfx = { git = "https://github.com/gfx-rs/gfx" }
+gfx = "*"
 gfx_app = { git = "https://github.com/gfx-rs/gfx" }
-gfx_window_glutin = "*"
-gfx_device_gl = "*"
-glutin = "*"
-bit-vec = "*"
+winit = "*"
