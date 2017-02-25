@@ -5,5 +5,5 @@ authors = ["Sum Proxy <sum.proxy@gmail.com>"]
 
 [dependencies]
 gfx = "*"
-gfx_app = { git = "https://github.com/gfx-rs/gfx" }
+gfx_app = "0.4.0"
 winit = "*"

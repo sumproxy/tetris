@@ -11,16 +11,17 @@ gfx_defines!{
     }
 
     pipeline pipe {
-        center: gfx::Global<[f32; 2]> = "u_center",
         color: gfx::Global<[f32; 3]> = "u_color",
+        center: gfx::Global<[f32; 2]> = "u_center",
         vbuf: gfx::VertexBuffer<Vertex> = (),
         out_color: gfx::RenderTarget<ColorFormat> = "target",
+        clear_color: gfx::Global<[f32; 4]> = "color",
     }
 }
 
 pub struct App<R: gfx::Resources>{
     bundle: Bundle<R, pipe::Data<R>>,
-    screen: State,
+    state: State,
 }
 
 impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
@@ -36,14 +37,14 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             .. gfx_app::shade::Source::empty()
         };
 
-        let screen = State::new();
-        let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&screen.elem.vertices, &screen.elem.indices as &[u16]);
+        let state = State::new();
+        let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&state.elem.vertices, &state.elem.indices as &[u16]);
         let data = pipe::Data {
             color: [1.0, 0.0, 0.0],
             center: [0.0, 0.0],
             vbuf: vertex_buffer,
             out_color: window_targets.color,
-            clear_color: [0.1, 0.1, 0.1],
+            clear_color: [0.1, 0.1, 0.1, 1.0],
         };
 
         let pso = factory.create_pipeline_simple(
@@ -54,12 +55,14 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
 
         App {
             bundle: Bundle::new(slice, pso, data),
-            screen: screen,
+            state: state,
         }
     }
 
     fn render<C: gfx::CommandBuffer<R>>(&mut self, encoder: &mut gfx::Encoder<R, C>) {
-        println!("{:?}", self.screen);
+        let mut data = self.bundle.data.clone();
+        data.center = [-0.5, 0.5];
+        encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
         encoder.clear(&self.bundle.data.out_color, self.bundle.data.clear_color);
         self.bundle.encode(encoder);
     }
