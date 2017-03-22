@@ -38,7 +38,17 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         };
 
         let state = State::new();
-        let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&state.elem.vertices, &state.elem.indices as &[u16]);
+        let width = 1.0 / state.frame.x() as f32;
+        let height = 1.0 / state.frame.y() as f32;
+
+        let vertices = [
+            Vertex { pos: [-width, -height] },
+            Vertex { pos: [-width,  height] },
+            Vertex { pos: [ width, -height] },
+            Vertex { pos: [ width,  height] },
+        ];
+        let indices = [0u16, 1, 2, 1, 2, 3];
+        let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&vertices, &indices as &[u16]);
         let data = pipe::Data {
             color: [1.0, 0.0, 0.0],
             center: [0.0, 0.0],
