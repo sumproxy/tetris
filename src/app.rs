@@ -4,6 +4,7 @@ use gfx_app;
 use gfx_app::ColorFormat;
 
 use common::State;
+use color::*;
 
 gfx_defines!{
     vertex Vertex {
@@ -25,7 +26,9 @@ pub struct App<R: gfx::Resources>{
 }
 
 impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
-    fn new<F: gfx::Factory<R>>(factory: &mut F, backend: gfx_app::shade::Backend, window_targets: gfx_app::WindowTargets<R>) -> Self {
+    fn new<F: gfx::Factory<R>>(factory: &mut F,
+                               backend: gfx_app::shade::Backend,
+                               window_targets: gfx_app::WindowTargets<R>) -> Self {
         use gfx::traits::FactoryExt;
 
         let vs = gfx_app::shade::Source {
@@ -38,8 +41,8 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         };
 
         let state = State::new();
-        let width = 1.0 / state.frame.x() as f32;
-        let height = 1.0 / state.frame.y() as f32;
+        let width = state.box_width();
+        let height = state.box_height();
 
         let vertices = [
             Vertex { pos: [-width, -height] },
@@ -49,9 +52,10 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         ];
         let indices = [0u16, 1, 2, 1, 2, 3];
         let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&vertices, &indices as &[u16]);
+
         let data = pipe::Data {
-            color: [1.0, 0.0, 0.0],
-            center: [0.0, 0.0],
+            color: color::GRAY,
+            center: [-2.0, -2.0],
             vbuf: vertex_buffer,
             out_color: window_targets.color,
             clear_color: [0.1, 0.1, 0.1, 1.0],
@@ -71,9 +75,22 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
 
     fn render<C: gfx::CommandBuffer<R>>(&mut self, encoder: &mut gfx::Encoder<R, C>) {
         let mut data = self.bundle.data.clone();
-        data.center = [-0.5, 0.5];
-        encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
-        encoder.clear(&self.bundle.data.out_color, self.bundle.data.clear_color);
+        let box_width = self.state.box_width();
+        let box_height = self.state.box_height();
+        let middle_y = self.state.y_dim() as f32 / 2.0 - 0.5;
+        let middle_x = self.state.x_dim() as f32 / 2.0 - 0.5;
+        encoder.clear(&data.out_color, data.clear_color);
+        for (y, row) in self.state.frame.iter().enumerate() {
+            for (x, cell) in row.iter().enumerate() {
+                let x_pos =   (x as f32 / middle_x - 1.0) * (1.0 - box_width);
+                let y_pos = - (y as f32 / middle_y - 1.0) * (1.0 - box_height);
+                if let Some(color) = *cell {
+                    data.center = [x_pos, y_pos];
+                    data.color = color;
+                    encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
+                }
+            }
+        }
         self.bundle.encode(encoder);
     }
 }
