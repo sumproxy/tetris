@@ -4,7 +4,7 @@ use gfx_app;
 use gfx_app::ColorFormat;
 
 use common::State;
-use color::*;
+use color;
 
 gfx_defines!{
     vertex Vertex {
@@ -54,7 +54,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&vertices, &indices as &[u16]);
 
         let data = pipe::Data {
-            color: color::GRAY,
+            color: color::GRAY.into(),
             center: [-2.0, -2.0],
             vbuf: vertex_buffer,
             out_color: window_targets.color,
@@ -80,16 +80,12 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let middle_y = self.state.y_dim() as f32 / 2.0 - 0.5;
         let middle_x = self.state.x_dim() as f32 / 2.0 - 0.5;
         encoder.clear(&data.out_color, data.clear_color);
-        for (y, row) in self.state.frame.iter().enumerate() {
-            for (x, cell) in row.iter().enumerate() {
-                let x_pos =   (x as f32 / middle_x - 1.0) * (1.0 - box_width);
-                let y_pos = - (y as f32 / middle_y - 1.0) * (1.0 - box_height);
-                if let Some(color) = *cell {
-                    data.center = [x_pos, y_pos];
-                    data.color = color;
-                    encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
-                }
-            }
+        for pos in self.state.inner.get_iter() {
+            let x =   (pos.x as f32 / middle_x - 1.0) * (1.0 - box_width);
+            let y = - (pos.y as f32 / middle_y - 1.0) * (1.0 - box_height);
+            data.center = [x, y];
+            data.color = self.state.inner.tile(pos).into();
+            encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
         }
         self.bundle.encode(encoder);
     }
