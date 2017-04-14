@@ -5,7 +5,10 @@ extern crate winit;
 
 mod app;
 mod common;
+
 use common::color;
+use common::piece;
+use common::map;
 
 use winit::WindowBuilder;
 use app::App;
@@ -19,4 +22,7 @@ fn main() {
         .with_title("Tetris!");
 
     App::launch_default(wb);
+
+    let i = piece::J;
+    i.rotate_left();
 }
