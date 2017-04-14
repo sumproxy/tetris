@@ -6,12 +6,10 @@ extern crate winit;
 mod app;
 mod common;
 
-use common::color;
-use common::piece;
-use common::map;
+use app::App;
+use common::{color, piece, map};
 
 use winit::WindowBuilder;
-use app::App;
 
 fn main() {
     use gfx_app::Application;

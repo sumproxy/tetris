@@ -21,19 +21,15 @@ impl State {
         state
     }
 
-    pub fn x_dim(&self) -> usize {
-        self.inner.width()
-    }
-
-    pub fn y_dim(&self) -> usize {
-        self.inner.height()
+    pub fn dim(&self) -> Size2 {
+        self.inner.size
     }
 
     pub fn box_width(&self) -> f32 {
-        1.0 / self.x_dim() as f32
+        1.0 / self.dim().w as f32
     }
 
     pub fn box_height(&self) -> f32 {
-        1.0 / self.y_dim() as f32
+        1.0 / self.dim().h as f32
     }
 }

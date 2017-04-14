@@ -77,8 +77,8 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let mut data = self.bundle.data.clone();
         let box_width = self.state.box_width();
         let box_height = self.state.box_height();
-        let middle_y = self.state.y_dim() as f32 / 2.0 - 0.5;
-        let middle_x = self.state.x_dim() as f32 / 2.0 - 0.5;
+        let middle_y = self.state.dim().h as f32 / 2.0 - 0.5;
+        let middle_x = self.state.dim().w as f32 / 2.0 - 0.5;
         encoder.clear(&data.out_color, data.clear_color);
         for pos in self.state.inner.get_iter() {
             let x =   (pos.x as f32 / middle_x - 1.0) * (1.0 - box_width);

@@ -13,7 +13,7 @@ pub struct Pos {
 #[derive(Clone)]
 pub struct Map<T> {
     tiles: Vec<T>,
-    size: Size2,
+    pub size: Size2,
 }
 
 impl<T: Clone + Default> Map<T> {
@@ -28,14 +28,6 @@ impl<T: Clone + Default> Map<T> {
 
     pub fn size(&self) -> Size2 {
         self.size
-    }
-
-    pub fn width(&self) -> usize {
-        self.size.w
-    }
-
-    pub fn height(&self) -> usize {
-        self.size.h
     }
 
     pub fn tile_mut(&mut self, pos: Pos) -> &mut T {
