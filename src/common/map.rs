@@ -1,3 +1,6 @@
+use super::template::{Template, DeltaPos};
+use super::Inner;
+
 #[derive(Copy, Clone)]
 pub struct Size2 {
     pub w: usize,
@@ -42,12 +45,6 @@ impl<T: Clone + Default> Map<T> {
         &self.tiles[index]
     }
 
-    pub fn is_inside(&self, pos: Pos) -> bool {
-        let x = pos.x;
-        let y = pos.y;
-        x < self.size.w && y < self.size.h
-    }
-
     pub fn get_iter(&self) -> MapIter {
         MapIter::new(self.size())
     }
@@ -85,5 +82,13 @@ impl Iterator for MapIter {
         }
 
         curr_pos
+    }
+}
+
+impl<T> Inner<Pos> for Map<T> {
+    fn is_inside(&self, delta: Pos) -> bool {
+        let x = delta.x;
+        let y = delta.y;
+        x < self.size.w && y < self.size.h
     }
 }

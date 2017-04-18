@@ -2,12 +2,13 @@
 extern crate gfx;
 extern crate gfx_app;
 extern crate winit;
+extern crate rand;
 
 mod app;
 mod common;
 
 use app::App;
-use common::{color, piece, map};
+use common::{color, template};
 
 use winit::WindowBuilder;
 
@@ -21,6 +22,6 @@ fn main() {
 
     App::launch_default(wb);
 
-    let i = piece::J;
+    let i = template::J;
     i.rotate_left();
 }

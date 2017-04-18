@@ -2,8 +2,10 @@ use gfx;
 use gfx::Bundle;
 use gfx_app;
 use gfx_app::ColorFormat;
+use winit::{Event, ElementState, VirtualKeyCode};
 
 use common::State;
+use common::template::DeltaPos;
 use color;
 
 gfx_defines!{
@@ -88,5 +90,27 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
         }
         self.bundle.encode(encoder);
+    }
+
+    fn on(&mut self, event: Event) {
+        match event {
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Left)) => {
+                self.state.move_piece(DeltaPos { dx: -1, dy: 0 });
+                println!("Left");
+            },
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Right)) => {
+                self.state.move_piece(DeltaPos { dx: 1, dy: 0 });
+                println!("Right");
+            },
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => {
+                self.state.move_piece(DeltaPos { dx: 0, dy: -1 });
+                println!("Up");
+            },
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => {
+                self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
+                println!("Down");
+            },
+            _ => (),
+        }
     }
 }
