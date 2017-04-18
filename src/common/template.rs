@@ -1,11 +1,11 @@
 #[derive(Copy, Clone, Debug)]
-struct DeltaPos {
+pub struct DeltaPos {
     pub dx: isize,
     pub dy: isize,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Template([DeltaPos; 4]);
+pub struct Template(pub [DeltaPos; 4]);
 
 impl Template {
     pub fn rotate_left(&self) -> Self {
@@ -24,6 +24,15 @@ impl Template {
             output.dy = -input.dx;
         }
         piece
+    }
+
+    pub fn generate() -> Self {
+        use rand;
+        use rand::Rng;
+
+        let mut rng = rand::thread_rng();
+        static TEMPLATES: [Template; 7] = [I, T, O, J, L, S, Z];
+        TEMPLATES[rng.gen_range(0, 7)]
     }
 }
 
