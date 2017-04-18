@@ -18,6 +18,7 @@ pub struct Piece {
 
 impl Piece {
     fn into(&self, board: &State) -> [Pos; 4] {
+
         [Pos { x: 0, y: 0 }; 4]
     }
 }
