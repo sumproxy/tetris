@@ -95,11 +95,11 @@ impl Inner<DeltaPos> for State {
     fn is_inside(&self, delta: DeltaPos) -> bool {
         let kind = self.piece.template;
         let pos = self.piece.pos;
-
+        
         kind.0.iter().all(|tile| {
             let dx = tile.dx + pos.x as isize + delta.dx;
             let dy = tile.dy + pos.y as isize + delta.dy;
-            0 < dx && 0 < dy && dx < self.dim().w as isize && dy < self.dim().h as isize
+            0 <= dx && 0 <= dy && dx < self.dim().w as isize && dy < self.dim().h as isize
         })
     }
 }
