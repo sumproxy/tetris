@@ -10,6 +10,7 @@ trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Piece {
     template: Template,
     pos: Pos,
@@ -17,9 +18,24 @@ pub struct Piece {
 }
 
 impl Piece {
-    fn into(&self, board: &State) -> [Pos; 4] {
+    fn try_into(&self, board: &State) -> Option<Vec<Pos>> {
+        let mut result = Vec::<Pos>::with_capacity(4);
+        for delta in self.template.0.iter() {
+            let dx = delta.dx + self.pos.x as isize;
+            let dy = delta.dy + self.pos.y as isize;
+            if dx < 0 || dy < 0 {
+                return None;
+            }
+            let pos = Pos { x: dx as usize, y: dy as usize};
+            if board.inner.is_inside(pos) {
+                result.push(pos);
+            }
+            else {
+                return None;
+            }
+        }
 
-        [Pos { x: 0, y: 0 }; 4]
+        Some(result)
     }
 }
 
@@ -38,29 +54,27 @@ impl State {
             piece: Piece { template: kind, pos: pos, color: color },
         };
         
-        // let mut iter = colors.iter().cycle();
-        // for pos in state.inner.get_iter() {
-        //     *state.inner.tile_mut(pos) = iter.next().unwrap().clone();
-        // }
+        state.draw_piece(true);
         state
     }
 
-    pub fn move_piece(&mut self, mut delta: DeltaPos) {
+    pub fn move_piece(&mut self, delta: DeltaPos) {
         if self.is_inside(delta) {
-            self.remove_piece();
-            self.put_piece();
+            self.draw_piece(false);
+            let mut pos = self.piece.pos;
+            pos.x = (pos.x as isize + delta.dx) as usize;
+            pos.y = (pos.y as isize + delta.dy) as usize;
+            self.piece.pos = pos;
+            self.draw_piece(true);
         }
     }
     
-    pub fn put_piece(&mut self) {
-        
-    }
-
-    pub fn remove_piece(&mut self) {
-        let kind = self.piece.template;
-        let pos = self.piece.pos;
-        for delta in kind.0.iter() {
-            //pos.x + delta.dx
+    pub fn draw_piece(&mut self, visible: bool) {
+        let piece = self.piece.clone();
+        if let Some(coords) = piece.try_into(&self) {
+            for pos in coords {
+                *self.inner.tile_mut(pos) = if !visible { color::Color::default() } else { piece.color };
+            }
         }
     }
 

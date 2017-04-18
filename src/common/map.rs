@@ -1,4 +1,3 @@
-use super::template::{Template, DeltaPos};
 use super::Inner;
 
 #[derive(Copy, Clone)]
@@ -7,7 +6,7 @@ pub struct Size2 {
     pub h: usize,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Pos {
     pub x: usize,
     pub y: usize,

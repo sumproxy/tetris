@@ -56,7 +56,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&vertices, &indices as &[u16]);
 
         let data = pipe::Data {
-            color: color::GRAY.into(),
+            color: color::Color::default().into(),
             center: [-2.0, -2.0],
             vbuf: vertex_buffer,
             out_color: window_targets.color,
@@ -96,19 +96,15 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         match event {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Left)) => {
                 self.state.move_piece(DeltaPos { dx: -1, dy: 0 });
-                println!("Left");
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Right)) => {
                 self.state.move_piece(DeltaPos { dx: 1, dy: 0 });
-                println!("Right");
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => {
                 self.state.move_piece(DeltaPos { dx: 0, dy: -1 });
-                println!("Up");
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => {
                 self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
-                println!("Down");
             },
             _ => (),
         }
