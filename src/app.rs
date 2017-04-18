@@ -106,6 +106,9 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => {
                 self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
             },
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::R)) => {
+                self.state.rotate_piece();
+            }
             _ => (),
         }
     }

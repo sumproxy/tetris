@@ -12,7 +12,7 @@ trait Inner<T> {
 
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
-    template: Template,
+    pub template: Template,
     pos: Pos,
     color: Color,
 }
@@ -39,6 +39,7 @@ impl Piece {
     }
 }
 
+#[derive(Debug)]
 pub struct State {
     pub inner: Map<Color>,
     pub piece: Piece,
@@ -53,7 +54,7 @@ impl State {
             inner: Map::<Color>::new(Size2 { w: 10, h: 22 }),
             piece: Piece { template: kind, pos: pos, color: color },
         };
-        
+
         state.draw_piece(true);
         state
     }
@@ -68,7 +69,22 @@ impl State {
             self.draw_piece(true);
         }
     }
-    
+
+    pub fn rotate_piece(&mut self) {
+        let backup = self.piece.template;
+        let rotated = backup.rotate_right();
+        self.piece.template = rotated;
+        if self.is_inside(DeltaPos { dx: 0, dy: 0 }) {
+            self.piece.template = backup;
+            self.draw_piece(false);
+            self.piece.template = rotated;
+            self.draw_piece(true);
+        }
+        else {
+            self.piece.template = backup;
+        }
+    }
+
     pub fn draw_piece(&mut self, visible: bool) {
         let piece = self.piece.clone();
         if let Some(coords) = piece.try_into(&self) {

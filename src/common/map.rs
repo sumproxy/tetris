@@ -1,6 +1,6 @@
 use super::Inner;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Size2 {
     pub w: usize,
     pub h: usize,
@@ -12,7 +12,7 @@ pub struct Pos {
     pub y: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Map<T> {
     tiles: Vec<T>,
     pub size: Size2,

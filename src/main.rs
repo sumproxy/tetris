@@ -21,7 +21,4 @@ fn main() {
         .with_title("Tetris!");
 
     App::launch_default(wb);
-
-    let i = template::J;
-    i.rotate_left();
 }
