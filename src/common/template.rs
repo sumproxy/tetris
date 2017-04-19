@@ -13,6 +13,7 @@ pub struct DeltaPos {
 pub struct Template(pub [DeltaPos; 4], Kind);
 
 impl Template {
+    #[allow(dead_code)]
     pub fn rotate_left(&self) -> Self {
         let mut piece = self.clone();
         if self.1 == Kind::O {

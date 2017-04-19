@@ -37,6 +37,14 @@ impl Piece {
 
         Some(result)
     }
+
+    fn generate() -> Self {
+        Piece {
+            template: Template::generate(),
+            pos: Pos { x: 4, y: 1 },
+            color: Color::generate(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -47,16 +55,18 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let kind = Template::generate();
-        let color = Color::generate();
-        let pos = Pos { x: 4, y: 1 };
         let mut state = State {
             inner: Map::<Color>::new(Size2 { w: 10, h: 22 }),
-            piece: Piece { template: kind, pos: pos, color: color },
+            piece: Piece::generate(),
         };
 
         state.draw_piece(true);
         state
+    }
+
+    pub fn bake_piece(&mut self) {
+        self.draw_piece(true);
+        self.piece = Piece::generate();
     }
 
     pub fn move_piece(&mut self, delta: DeltaPos) {

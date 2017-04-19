@@ -8,7 +8,7 @@ mod app;
 mod common;
 
 use app::App;
-use common::{color, template};
+use common::color;
 
 use winit::WindowBuilder;
 

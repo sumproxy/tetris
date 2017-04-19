@@ -109,6 +109,9 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::R)) => {
                 self.state.rotate_piece();
             }
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Space)) => {
+                self.state.bake_piece();
+            }
             _ => (),
         }
     }
