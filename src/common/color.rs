@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Color([f32; 3]);
 
 pub const RED:     Color = Color([0.8f32, 0.0f32, 0.0f32]);

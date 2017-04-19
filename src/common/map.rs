@@ -6,7 +6,7 @@ pub struct Size2 {
     pub h: usize,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Pos {
     pub x: usize,
     pub y: usize,
@@ -38,7 +38,7 @@ impl<T: Clone + Default> Map<T> {
         &mut self.tiles[index]
     }
 
-    pub fn tile(&mut self, pos: Pos) -> &T {
+    pub fn tile(&self, pos: Pos) -> &T {
         assert!(self.is_inside(pos));
         let index = self.size.w * pos.y + pos.x;
         &self.tiles[index]

@@ -77,27 +77,38 @@ impl State {
 
     pub fn move_piece(&mut self, delta: DeltaPos) {
         if self.is_inside(delta) {
-            self.draw_piece(Visible::No);
-            let mut pos = self.piece.pos;
+            let mut moved = self.piece;
+            let mut pos = moved.pos;
             pos.x = (pos.x as isize + delta.dx) as usize;
             pos.y = (pos.y as isize + delta.dy) as usize;
-            self.piece.pos = pos;
-            self.draw_piece(Visible::Yes);
+            moved.pos = pos;
+
+            if !self.is_colliding(moved) {
+                self.draw_piece(Visible::No);
+                let mut pos = self.piece.pos;
+                pos.x = (pos.x as isize + delta.dx) as usize;
+                pos.y = (pos.y as isize + delta.dy) as usize;
+                self.piece.pos = pos;
+                self.draw_piece(Visible::Yes);
+            }
         }
     }
 
     pub fn rotate_piece(&mut self) {
-        let backup = self.piece.template;
-        let rotated = backup.rotate_right();
-        self.piece.template = rotated;
-        if self.is_inside(DeltaPos { dx: 0, dy: 0 }) {
-            self.piece.template = backup;
+        let mut copy = self.piece;
+        let backup_template = copy.template;
+        let rotated_template = copy.template.rotate_right();
+        copy.template = rotated_template;
+        let is_colliding = self.is_colliding(copy);
+        self.piece.template = rotated_template;
+        if self.is_inside(DeltaPos { dx: 0, dy: 0 }) && !is_colliding {
+            self.piece.template = backup_template;
             self.draw_piece(Visible::No);
-            self.piece.template = rotated;
+            self.piece.template = rotated_template;
             self.draw_piece(Visible::Yes);
         }
         else {
-            self.piece.template = backup;
+            self.piece.template = backup_template;
         }
     }
 
@@ -106,10 +117,31 @@ impl State {
         if let Some(coords) = piece.try_into(&self) {
             for pos in coords {
                 *self.inner.tile_mut(pos) = match visible {
-                    Visible::No => color::Color::default(),
+                    Visible::No => Color::default(),
                     Visible::Yes => piece.color,
                 };
             }
+        }
+    }
+
+    fn is_colliding(&self, piece: Piece) -> bool {
+        let old_coords;
+        if let Some(coords) = self.piece.try_into(&self) {
+            old_coords = coords;
+        }
+        else {
+            return true;
+        }
+
+        if let Some(coords) = piece.try_into(&self) {
+            coords
+                .iter()
+                .filter(|x| !old_coords.contains(x))
+                .map(|&pos| *self.inner.tile(pos))
+                .any(|col| col != Color::default())
+        }
+        else {
+            true
         }
     }
 
