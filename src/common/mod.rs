@@ -10,6 +10,11 @@ trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
 }
 
+pub enum Visible {
+    Yes,
+    No,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
     pub template: Template,
@@ -60,23 +65,24 @@ impl State {
             piece: Piece::generate(),
         };
 
-        state.draw_piece(true);
+        state.draw_piece(Visible::Yes);
         state
     }
 
     pub fn bake_piece(&mut self) {
-        self.draw_piece(true);
+        self.draw_piece(Visible::Yes);
         self.piece = Piece::generate();
+        self.draw_piece(Visible::Yes);
     }
 
     pub fn move_piece(&mut self, delta: DeltaPos) {
         if self.is_inside(delta) {
-            self.draw_piece(false);
+            self.draw_piece(Visible::No);
             let mut pos = self.piece.pos;
             pos.x = (pos.x as isize + delta.dx) as usize;
             pos.y = (pos.y as isize + delta.dy) as usize;
             self.piece.pos = pos;
-            self.draw_piece(true);
+            self.draw_piece(Visible::Yes);
         }
     }
 
@@ -86,20 +92,23 @@ impl State {
         self.piece.template = rotated;
         if self.is_inside(DeltaPos { dx: 0, dy: 0 }) {
             self.piece.template = backup;
-            self.draw_piece(false);
+            self.draw_piece(Visible::No);
             self.piece.template = rotated;
-            self.draw_piece(true);
+            self.draw_piece(Visible::Yes);
         }
         else {
             self.piece.template = backup;
         }
     }
 
-    pub fn draw_piece(&mut self, visible: bool) {
+    pub fn draw_piece(&mut self, visible: Visible) {
         let piece = self.piece.clone();
         if let Some(coords) = piece.try_into(&self) {
             for pos in coords {
-                *self.inner.tile_mut(pos) = if !visible { color::Color::default() } else { piece.color };
+                *self.inner.tile_mut(pos) = match visible {
+                    Visible::No => color::Color::default(),
+                    Visible::Yes => piece.color,
+                };
             }
         }
     }
