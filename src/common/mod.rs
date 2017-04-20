@@ -84,12 +84,7 @@ impl State {
             moved.pos = pos;
 
             if !self.is_colliding(moved) {
-                self.draw_piece(Visible::No);
-                let mut pos = self.piece.pos;
-                pos.x = (pos.x as isize + delta.dx) as usize;
-                pos.y = (pos.y as isize + delta.dy) as usize;
-                self.piece.pos = pos;
-                self.draw_piece(Visible::Yes);
+                self.piece.pos = moved.pos;
             }
         }
     }

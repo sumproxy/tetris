@@ -4,7 +4,7 @@ use gfx_app;
 use gfx_app::ColorFormat;
 use winit::{Event, ElementState, VirtualKeyCode};
 
-use common::State;
+use common::{State, Visible};
 use common::template::DeltaPos;
 use color;
 
@@ -95,22 +95,32 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
     fn on(&mut self, event: Event) {
         match event {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Left)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.move_piece(DeltaPos { dx: -1, dy: 0 });
+                self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Right)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.move_piece(DeltaPos { dx: 1, dy: 0 });
+                self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.move_piece(DeltaPos { dx: 0, dy: -1 });
+                self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
+                self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::R)) => {
                 self.state.rotate_piece();
             }
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Space)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.bake_piece();
+                self.state.draw_piece(Visible::Yes);
             }
             _ => (),
         }
