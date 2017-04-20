@@ -69,13 +69,25 @@ impl State {
         state
     }
 
+    pub fn draw_piece(&mut self, visible: Visible) {
+        let piece = self.piece.clone();
+        if let Some(coords) = piece.try_into(&self) {
+            for pos in coords {
+                *self.inner.tile_mut(pos) = match visible {
+                    Visible::No => Color::default(),
+                    Visible::Yes => piece.color,
+                };
+            }
+        }
+    }
+
     pub fn bake_piece(&mut self) {
         self.draw_piece(Visible::Yes);
         self.piece = Piece::generate();
         self.draw_piece(Visible::Yes);
     }
 
-    pub fn move_piece(&mut self, delta: DeltaPos) {
+    pub fn move_piece(&mut self, delta: DeltaPos) -> Result<(), ()> {
         let mut moved = self.piece;
         let mut pos = moved.pos;
         pos.x = (pos.x as isize + delta.dx) as usize;
@@ -84,6 +96,10 @@ impl State {
 
         if self.is_inside(moved) && !self.is_colliding(moved) {
             self.piece.pos = moved.pos;
+            Ok(())
+        }
+        else {
+            Err(())
         }
     }
 
@@ -95,16 +111,8 @@ impl State {
         }
     }
 
-    pub fn draw_piece(&mut self, visible: Visible) {
-        let piece = self.piece.clone();
-        if let Some(coords) = piece.try_into(&self) {
-            for pos in coords {
-                *self.inner.tile_mut(pos) = match visible {
-                    Visible::No => Color::default(),
-                    Visible::Yes => piece.color,
-                };
-            }
-        }
+    pub fn hard_drop(&mut self) {
+        while let Ok(()) = self.move_piece(DeltaPos { dx: 0, dy: 1 }) {};
     }
 
     fn is_colliding(&self, piece: Piece) -> bool {
