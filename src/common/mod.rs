@@ -76,34 +76,22 @@ impl State {
     }
 
     pub fn move_piece(&mut self, delta: DeltaPos) {
-        if self.is_inside(delta) {
-            let mut moved = self.piece;
-            let mut pos = moved.pos;
-            pos.x = (pos.x as isize + delta.dx) as usize;
-            pos.y = (pos.y as isize + delta.dy) as usize;
-            moved.pos = pos;
+        let mut moved = self.piece;
+        let mut pos = moved.pos;
+        pos.x = (pos.x as isize + delta.dx) as usize;
+        pos.y = (pos.y as isize + delta.dy) as usize;
+        moved.pos = pos;
 
-            if !self.is_colliding(moved) {
-                self.piece.pos = moved.pos;
-            }
+        if self.is_inside(moved) && !self.is_colliding(moved) {
+            self.piece.pos = moved.pos;
         }
     }
 
     pub fn rotate_piece(&mut self) {
-        let mut copy = self.piece;
-        let backup_template = copy.template;
-        let rotated_template = copy.template.rotate_right();
-        copy.template = rotated_template;
-        let is_colliding = self.is_colliding(copy);
-        self.piece.template = rotated_template;
-        if self.is_inside(DeltaPos { dx: 0, dy: 0 }) && !is_colliding {
-            self.piece.template = backup_template;
-            self.draw_piece(Visible::No);
-            self.piece.template = rotated_template;
-            self.draw_piece(Visible::Yes);
-        }
-        else {
-            self.piece.template = backup_template;
+        let mut rotated = self.piece;
+        rotated.template = rotated.template.rotate_right();
+        if self.is_inside(rotated) && !self.is_colliding(rotated) {
+            self.piece = rotated;
         }
     }
 
@@ -153,14 +141,14 @@ impl State {
     }
 }
 
-impl Inner<DeltaPos> for State {
-    fn is_inside(&self, delta: DeltaPos) -> bool {
-        let kind = self.piece.template;
-        let pos = self.piece.pos;
+impl Inner<Piece> for State {
+    fn is_inside(&self, piece: Piece) -> bool {
+        let kind = piece.template;
+        let pos = piece.pos;
         
         kind.0.iter().all(|tile| {
-            let dx = tile.dx + pos.x as isize + delta.dx;
-            let dy = tile.dy + pos.y as isize + delta.dy;
+            let dx = tile.dx + pos.x as isize;
+            let dy = tile.dy + pos.y as isize;
             0 <= dx && 0 <= dy && dx < self.dim().w as isize && dy < self.dim().h as isize
         })
     }

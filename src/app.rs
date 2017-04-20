@@ -115,7 +115,9 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
                 self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::R)) => {
+                self.state.draw_piece(Visible::No);
                 self.state.rotate_piece();
+                self.state.draw_piece(Visible::Yes);
             }
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Space)) => {
                 self.state.draw_piece(Visible::No);
