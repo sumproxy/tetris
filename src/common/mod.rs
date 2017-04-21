@@ -81,10 +81,8 @@ impl State {
         }
     }
 
-    pub fn bake_piece(&mut self) {
-        self.draw_piece(Visible::Yes);
+    pub fn spawn_piece(&mut self) {
         self.piece = Piece::generate();
-        self.draw_piece(Visible::Yes);
     }
 
     pub fn move_piece(&mut self, delta: DeltaPos) -> Result<(), ()> {
@@ -112,27 +110,67 @@ impl State {
     }
 
     pub fn hard_drop(&mut self) {
-        while let Ok(()) = self.move_piece(DeltaPos { dx: 0, dy: 1 }) {};
+        let down = DeltaPos { dx: 0, dy: 1 };
+        while let Ok(()) = self.move_piece(down) {};
+    }
+
+    pub fn collapse_rows(&mut self) {
+        let mut filled_rows = self.filled_rows();
+        while let Some(row) = filled_rows.pop() {
+            self.remove_row(row);
+            for row in filled_rows.iter_mut() {
+                *row += 1;
+            }
+        }
     }
 
     fn is_colliding(&self, piece: Piece) -> bool {
-        let old_coords;
-        if let Some(coords) = self.piece.try_into(&self) {
-            old_coords = coords;
-        }
-        else {
-            return true;
-        }
-
-        if let Some(coords) = piece.try_into(&self) {
-            coords
+        if let (Some(old_coords), Some(new_coords)) = (self.piece.try_into(&self), piece.try_into(&self)) {
+            new_coords
                 .iter()
-                .filter(|x| !old_coords.contains(x))
+                .filter(|pos| !old_coords.contains(pos))
                 .map(|&pos| *self.inner.tile(pos))
-                .any(|col| col != Color::default())
+                .any(|color| color != Color::default())
         }
         else {
             true
+        }
+    }
+
+    fn filled_rows(&self) -> Vec<usize> {
+        let mut result = Vec::with_capacity(4); // can't get more than 4
+        for y in 0..self.inner.size().h {
+            if self.is_row_filled(y) {
+                result.push(y)
+            }
+        }
+        result
+    }
+
+    fn is_row_filled(&self, y: usize) -> bool {
+        for x in 0..self.inner.size().w {
+            let pos = Pos {x: x, y: y};
+            if *self.inner.tile(pos) == Color::default() {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn remove_row(&mut self, y: usize) {
+        for row in (1..y+1).rev() {
+            self.move_row_down(row);
+        }
+        for x in 0..self.inner.size().w {
+            let pos = Pos {x: x, y: 0};
+            *self.inner.tile_mut(pos) = Color::default();
+        }
+    }
+
+    fn move_row_down(&mut self, y: usize) {
+        for x in 0..self.inner.size().w {
+            let (old_pos, new_pos) = (Pos { x: x, y: y-1 }, Pos { x: x, y: y });
+            *self.inner.tile_mut(new_pos) = *self.inner.tile(old_pos);
         }
     }
 

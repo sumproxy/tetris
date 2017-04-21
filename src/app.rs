@@ -109,7 +109,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
                 self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
                 self.state.draw_piece(Visible::Yes);
             },
-            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::R)) => {
+            Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => {
                 self.state.draw_piece(Visible::No);
                 self.state.rotate_piece();
                 self.state.draw_piece(Visible::Yes);
@@ -117,7 +117,10 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Space)) => {
                 self.state.draw_piece(Visible::No);
                 self.state.hard_drop();
-                self.state.bake_piece();
+                self.state.draw_piece(Visible::Yes);
+                self.state.collapse_rows();
+                self.state.spawn_piece();
+                self.state.draw_piece(Visible::Yes);
             }
             _ => (),
         }
