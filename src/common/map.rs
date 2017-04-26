@@ -1,4 +1,5 @@
 use super::Inner;
+use super::template::DeltaPos;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Size2 {

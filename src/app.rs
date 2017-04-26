@@ -76,6 +76,18 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
     }
 
     fn render<C: gfx::CommandBuffer<R>>(&mut self, encoder: &mut gfx::Encoder<R, C>) {
+        if self.state.timer.tick().is_some() {
+            self.state.draw_piece(Visible::No);
+            if self.state.move_piece(DeltaPos { dx: 0, dy: 1 }).is_err() {
+                self.state.draw_piece(Visible::Yes);
+                self.state.collapse_rows();
+                self.state.spawn_piece();
+                self.state.draw_piece(Visible::Yes);
+            }
+            else {
+                self.state.draw_piece(Visible::Yes);
+            }
+        }
         let mut data = self.bundle.data.clone();
         let box_width = self.state.box_width();
         let box_height = self.state.box_height();

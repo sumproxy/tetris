@@ -2,6 +2,8 @@ pub mod template;
 pub mod color;
 pub mod map;
 
+use ::std::time::{Duration, Instant};
+
 use self::map::{Map, Pos, Size2};
 use self::template::{Template, DeltaPos};
 use self::color::Color;
@@ -52,10 +54,33 @@ impl Piece {
     }
 }
 
-#[derive(Debug)]
+pub struct Timer {
+    accumulator: Instant,
+    threshold: Duration,
+}
+
+impl Timer {
+    fn new() -> Self {
+        Timer {
+            accumulator: Instant::now(),
+            threshold: Duration::from_millis(350),
+        }
+    }
+
+    pub fn tick(&mut self) -> Option<()> {
+        if self.accumulator.elapsed() > self.threshold {
+            self.accumulator = Instant::now();
+            Some(())
+        } else {
+            None
+        }
+    }
+}
+
 pub struct State {
     pub inner: Map<Color>,
     pub piece: Piece,
+    pub timer: Timer,
 }
 
 impl State {
@@ -63,6 +88,7 @@ impl State {
         let mut state = State {
             inner: Map::<Color>::new(Size2 { w: 10, h: 22 }),
             piece: Piece::generate(),
+            timer: Timer::new(),
         };
 
         state.draw_piece(Visible::Yes);
