@@ -8,7 +8,7 @@ use self::map::{Map, Pos, Size2};
 use self::template::{Template, DeltaPos};
 use self::color::Color;
 
-const MAX_ROWS_COUNT: usize = 4;
+const MAX_ROW_COUNT: usize = 4;
 
 trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
@@ -28,7 +28,7 @@ pub struct Piece {
 
 impl Piece {
     fn try_into(&self, board: &State) -> Option<Vec<Pos>> {
-        let mut result = Vec::<Pos>::with_capacity(MAX_ROWS_COUNT);
+        let mut result = Vec::<Pos>::with_capacity(MAX_ROW_COUNT);
         for delta in self.template.0.iter() {
             let dx = delta.dx + self.pos.x as isize;
             let dy = delta.dy + self.pos.y as isize;
@@ -205,7 +205,7 @@ impl State {
     }
 
     fn filled_rows(&self) -> Vec<usize> {
-        let mut result = Vec::with_capacity(MAX_ROWS_COUNT);
+        let mut result = Vec::with_capacity(MAX_ROW_COUNT);
         for y in 0..self.inner.size().h {
             if self.is_row_filled(y) {
                 result.push(y)
