@@ -69,12 +69,18 @@ impl Timer {
         }
     }
 
-    pub fn tick(&mut self) -> Option<()> {
+    pub fn is_up(&mut self) -> Option<()> {
         if self.accumulator.elapsed() > self.threshold {
             self.accumulator = Instant::now();
             Some(())
         } else {
             None
+        }
+    }
+
+    fn lower_threshold(&mut self) {
+        if self.threshold - Duration::from_millis(5) >= Duration::from_millis(100) {
+            self.threshold -= Duration::from_millis(5);
         }
     }
 }
@@ -166,6 +172,9 @@ impl State {
 
     pub fn collapse_rows(&mut self) {
         let mut filled_rows = self.filled_rows();
+        if filled_rows.len() > 0 {
+            self.timer.lower_threshold();
+        }
         self.score += match filled_rows.len() {
             1 => 40,
             2 => 100,
