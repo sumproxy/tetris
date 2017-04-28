@@ -76,7 +76,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
     }
 
     fn render<C: gfx::CommandBuffer<R>>(&mut self, encoder: &mut gfx::Encoder<R, C>) {
-        if !self.state.is_gameover && self.state.timer.is_up().is_some() {
+        if !self.state.is_gameover && self.state.timer.is_up() {
             self.state.draw_piece(Visible::No);
             if self.state.move_piece(DeltaPos { dx: 0, dy: 1 }).is_err() {
                 self.state.draw_piece(Visible::Yes);

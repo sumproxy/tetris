@@ -69,12 +69,12 @@ impl Timer {
         }
     }
 
-    pub fn is_up(&mut self) -> Option<()> {
+    pub fn is_up(&mut self) -> bool {
         if self.accumulator.elapsed() > self.threshold {
             self.accumulator = Instant::now();
-            Some(())
+            true
         } else {
-            None
+            false
         }
     }
 
