@@ -6,7 +6,7 @@ use winit::{Event, ElementState, VirtualKeyCode};
 
 use common::{State, Visible};
 use common::template::DeltaPos;
-use color;
+use color::Color;
 
 gfx_defines!{
     vertex Vertex {
@@ -56,7 +56,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&vertices, &indices as &[u16]);
 
         let data = pipe::Data {
-            color: color::Color::default().into(),
+            color: Color::default().into(),
             center: [-2.0, -2.0],
             vbuf: vertex_buffer,
             out_color: window_targets.color,
@@ -76,13 +76,17 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
     }
 
     fn render<C: gfx::CommandBuffer<R>>(&mut self, encoder: &mut gfx::Encoder<R, C>) {
-        if self.state.timer.tick().is_some() {
+        if !self.state.is_gameover && self.state.timer.tick().is_some() {
             self.state.draw_piece(Visible::No);
             if self.state.move_piece(DeltaPos { dx: 0, dy: 1 }).is_err() {
                 self.state.draw_piece(Visible::Yes);
                 self.state.collapse_rows();
-                self.state.spawn_piece();
-                self.state.draw_piece(Visible::Yes);
+                if self.state.spawn_piece().is_err() {
+                    println!("Game over\nYour score: {}", self.state.score);
+                }
+                else {
+                    self.state.draw_piece(Visible::Yes);
+                }
             }
             else {
                 self.state.draw_piece(Visible::Yes);
@@ -105,20 +109,23 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
     }
 
     fn on(&mut self, event: Event) {
+        if self.state.is_gameover {
+            return;
+        }
         match event {
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Left)) => {
                 self.state.draw_piece(Visible::No);
-                self.state.move_piece(DeltaPos { dx: -1, dy: 0 });
+                let _ = self.state.move_piece(DeltaPos { dx: -1, dy: 0 });
                 self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Right)) => {
                 self.state.draw_piece(Visible::No);
-                self.state.move_piece(DeltaPos { dx: 1, dy: 0 });
+                let _ = self.state.move_piece(DeltaPos { dx: 1, dy: 0 });
                 self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Down)) => {
                 self.state.draw_piece(Visible::No);
-                self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
+                let _ = self.state.move_piece(DeltaPos { dx: 0, dy: 1 });
                 self.state.draw_piece(Visible::Yes);
             },
             Event::KeyboardInput(ElementState::Pressed, _, Some(VirtualKeyCode::Up)) => {
@@ -131,8 +138,12 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
                 self.state.hard_drop();
                 self.state.draw_piece(Visible::Yes);
                 self.state.collapse_rows();
-                self.state.spawn_piece();
-                self.state.draw_piece(Visible::Yes);
+                if self.state.spawn_piece().is_err() {
+                    println!("Game over\nYour score: {}", self.state.score);
+                }
+                else {
+                    self.state.draw_piece(Visible::Yes);
+                }
             }
             _ => (),
         }

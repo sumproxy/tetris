@@ -8,6 +8,8 @@ use self::map::{Map, Pos, Size2};
 use self::template::{Template, DeltaPos};
 use self::color::Color;
 
+const MAX_ROWS_COUNT: usize = 4;
+
 trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
 }
@@ -26,7 +28,7 @@ pub struct Piece {
 
 impl Piece {
     fn try_into(&self, board: &State) -> Option<Vec<Pos>> {
-        let mut result = Vec::<Pos>::with_capacity(4);
+        let mut result = Vec::<Pos>::with_capacity(MAX_ROWS_COUNT);
         for delta in self.template.0.iter() {
             let dx = delta.dx + self.pos.x as isize;
             let dy = delta.dy + self.pos.y as isize;
@@ -81,6 +83,8 @@ pub struct State {
     pub inner: Map<Color>,
     pub piece: Piece,
     pub timer: Timer,
+    pub score: u64,
+    pub is_gameover: bool,
 }
 
 impl State {
@@ -89,6 +93,8 @@ impl State {
             inner: Map::<Color>::new(Size2 { w: 10, h: 22 }),
             piece: Piece::generate(),
             timer: Timer::new(),
+            score: 0,
+            is_gameover: false,
         };
 
         state.draw_piece(Visible::Yes);
@@ -107,8 +113,26 @@ impl State {
         }
     }
 
-    pub fn spawn_piece(&mut self) {
-        self.piece = Piece::generate();
+    pub fn spawn_piece(&mut self) -> Result<(), ()> {
+        let piece = Piece::generate();
+        if let Some(coords) = piece.try_into(&self) {
+            let is_colliding = coords
+                .iter()
+                .map(|&pos| *self.inner.tile(pos))
+                .any(|color| color != Color::default());
+
+            if is_colliding {
+                self.is_gameover = true;
+                Err(())
+            }
+            else {
+                self.piece = piece;
+                Ok(())
+            }
+        }
+        else {
+            Err(())
+        }
     }
 
     pub fn move_piece(&mut self, delta: DeltaPos) -> Result<(), ()> {
@@ -142,6 +166,14 @@ impl State {
 
     pub fn collapse_rows(&mut self) {
         let mut filled_rows = self.filled_rows();
+        self.score += match filled_rows.len() {
+            1 => 40,
+            2 => 100,
+            3 => 300,
+            4 => 1200,
+            _ => 0,
+        };
+
         while let Some(row) = filled_rows.pop() {
             self.remove_row(row);
             for row in filled_rows.iter_mut() {
@@ -164,7 +196,7 @@ impl State {
     }
 
     fn filled_rows(&self) -> Vec<usize> {
-        let mut result = Vec::with_capacity(4); // can't get more than 4
+        let mut result = Vec::with_capacity(MAX_ROWS_COUNT);
         for y in 0..self.inner.size().h {
             if self.is_row_filled(y) {
                 result.push(y)
