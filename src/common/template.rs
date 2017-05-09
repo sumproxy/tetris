@@ -10,7 +10,7 @@ pub struct DeltaPos {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Template(pub [DeltaPos; 4], Kind);
+pub struct Template(pub [DeltaPos; 4], pub Kind);
 
 impl Template {
     #[allow(dead_code)]

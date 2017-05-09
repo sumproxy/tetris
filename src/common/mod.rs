@@ -3,9 +3,10 @@ pub mod color;
 pub mod map;
 
 use ::std::time::{Duration, Instant};
+use ::std::collections::VecDeque;
 
 use self::map::{Map, Pos, Size2};
-use self::template::{Template, DeltaPos};
+use self::template::{Template, DeltaPos, Kind};
 use self::color::Color;
 
 const MAX_ROW_COUNT: usize = 4;
@@ -27,7 +28,7 @@ pub struct Piece {
 }
 
 impl Piece {
-    fn try_into(&self, board: &State) -> Option<Vec<Pos>> {
+    fn try_into(&self, map: &Map<Color>) -> Option<Vec<Pos>> {
         let mut result = Vec::<Pos>::with_capacity(MAX_ROW_COUNT);
         for delta in self.template.0.iter() {
             let dx = delta.dx + self.pos.x as isize;
@@ -36,7 +37,7 @@ impl Piece {
                 return None;
             }
             let pos = Pos { x: dx as usize, y: dy as usize};
-            if board.inner.is_inside(pos) {
+            if map.is_inside(pos) {
                 result.push(pos);
             }
             else {
@@ -85,8 +86,30 @@ impl Timer {
     }
 }
 
+pub struct PieceQueue {
+    data: VecDeque<Piece>
+}
+
+impl PieceQueue {
+    fn new(size: usize) -> Self {
+        let mut data = VecDeque::<Piece>::with_capacity(size);
+        for _ in 0..3 {
+            data.push_back(Piece::generate());
+        }
+        PieceQueue { data: data }
+    }
+
+    fn next(&mut self) -> Piece {
+        let next = self.data.pop_front();
+        self.data.push_back(Piece::generate());
+        next.unwrap()
+    }
+}
+
 pub struct State {
-    pub inner: Map<Color>,
+    pub main: Map<Color>,
+    pub preview: Map<Color>,
+    pub queue: PieceQueue,
     pub piece: Piece,
     pub timer: Timer,
     pub score: u64,
@@ -96,22 +119,25 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         let mut state = State {
-            inner: Map::<Color>::new(Size2 { w: 10, h: 22 }),
+            main: Map::<Color>::new(Size2 { w: 10, h: 22 }),
+            preview: Map::<Color>::new(Size2 { w: 4, h: 22}),
+            queue: PieceQueue::new(3),
             piece: Piece::generate(),
             timer: Timer::new(),
             score: 0,
             is_gameover: false,
         };
 
+        state.redraw_preview();
         state.draw_piece(Visible::Yes);
         state
     }
 
     pub fn draw_piece(&mut self, visible: Visible) {
         let piece = self.piece.clone();
-        if let Some(coords) = piece.try_into(&self) {
+        if let Some(coords) = piece.try_into(&self.main) {
             for pos in coords {
-                *self.inner.tile_mut(pos) = match visible {
+                *self.main.tile_mut(pos) = match visible {
                     Visible::No => Color::default(),
                     Visible::Yes => piece.color,
                 };
@@ -119,12 +145,33 @@ impl State {
         }
     }
 
+    pub fn redraw_preview(&mut self) {
+        for pos in self.preview.get_iter() {
+            *self.preview.tile_mut(pos) = color::PREVIEW;
+        }
+        let mut bottom = 1;
+        for piece in self.queue.data.iter() {
+            let mut piece = piece.clone();
+            if piece.template.1 == Kind::I {
+                bottom -= 1;
+            }
+            piece.pos = Pos { x: 1, y: bottom };
+            let coords = piece.try_into(&self.preview).unwrap();
+            bottom = coords.iter().map(|pos| pos.y).max().unwrap() + 3;
+            for pos in coords {
+                *self.preview.tile_mut(pos) = piece.color;
+            }
+        }
+    }
+
     pub fn spawn_piece(&mut self) -> Result<(), ()> {
-        let piece = Piece::generate();
-        if let Some(coords) = piece.try_into(&self) {
+        let piece = self.queue.next();
+        if let Some(coords) = piece.try_into(&self.main) {
+            self.redraw_preview();
+
             let is_colliding = coords
                 .iter()
-                .map(|&pos| *self.inner.tile(pos))
+                .map(|&pos| *self.main.tile(pos))
                 .any(|color| color != Color::default());
 
             if is_colliding {
@@ -192,11 +239,11 @@ impl State {
     }
 
     fn is_colliding(&self, piece: Piece) -> bool {
-        if let (Some(old_coords), Some(new_coords)) = (self.piece.try_into(&self), piece.try_into(&self)) {
+        if let (Some(old_coords), Some(new_coords)) = (self.piece.try_into(&self.main), piece.try_into(&self.main)) {
             new_coords
                 .iter()
                 .filter(|pos| !old_coords.contains(pos))
-                .map(|&pos| *self.inner.tile(pos))
+                .map(|&pos| *self.main.tile(pos))
                 .any(|color| color != Color::default())
         }
         else {
@@ -206,7 +253,7 @@ impl State {
 
     fn filled_rows(&self) -> Vec<usize> {
         let mut result = Vec::with_capacity(MAX_ROW_COUNT);
-        for y in 0..self.inner.size().h {
+        for y in 0..self.main.size().h {
             if self.is_row_filled(y) {
                 result.push(y)
             }
@@ -215,9 +262,9 @@ impl State {
     }
 
     fn is_row_filled(&self, y: usize) -> bool {
-        for x in 0..self.inner.size().w {
+        for x in 0..self.main.size().w {
             let pos = Pos {x: x, y: y};
-            if *self.inner.tile(pos) == Color::default() {
+            if *self.main.tile(pos) == Color::default() {
                 return false;
             }
         }
@@ -228,21 +275,23 @@ impl State {
         for row in (1..y+1).rev() {
             self.move_row_down(row);
         }
-        for x in 0..self.inner.size().w {
+        for x in 0..self.main.size().w {
             let pos = Pos {x: x, y: 0};
-            *self.inner.tile_mut(pos) = Color::default();
+            *self.main.tile_mut(pos) = Color::default();
         }
     }
 
     fn move_row_down(&mut self, y: usize) {
-        for x in 0..self.inner.size().w {
+        for x in 0..self.main.size().w {
             let (old_pos, new_pos) = (Pos { x: x, y: y-1 }, Pos { x: x, y: y });
-            *self.inner.tile_mut(new_pos) = *self.inner.tile(old_pos);
+            *self.main.tile_mut(new_pos) = *self.main.tile(old_pos);
         }
     }
 
     pub fn dim(&self) -> Size2 {
-        self.inner.size
+        let main = self.main.size;
+        let preview = self.preview.size;
+        Size2 { w: main.w + preview.w, h: main.h }
     }
 
     pub fn box_width(&self) -> f32 {

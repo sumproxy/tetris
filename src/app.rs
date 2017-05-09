@@ -98,11 +98,19 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
         let middle_y = self.state.dim().h as f32 / 2.0 - 0.5;
         let middle_x = self.state.dim().w as f32 / 2.0 - 0.5;
         encoder.clear(&data.out_color, data.clear_color);
-        for pos in self.state.inner.get_iter() {
+        for pos in self.state.main.get_iter() {
             let x =   (pos.x as f32 / middle_x - 1.0) * (1.0 - box_width);
             let y = - (pos.y as f32 / middle_y - 1.0) * (1.0 - box_height);
             data.center = [x, y];
-            data.color = self.state.inner.tile(pos).into();
+            data.color = self.state.main.tile(pos).into();
+            encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
+        }
+        let offset = self.state.dim().w - 4;
+        for pos in self.state.preview.get_iter() {
+            let x = ((pos.x + offset) as f32 / middle_x - 1.0) * (1.0 - box_width);
+            let y = - (pos.y as f32 / middle_y - 1.0) * (1.0 - box_height);
+            data.center = [x, y];
+            data.color = self.state.preview.tile(pos).into();
             encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
         }
         self.bundle.encode(encoder);
