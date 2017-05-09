@@ -7,3 +7,4 @@ Go to the directory, build and run:
 ```
 cd tetris; cargo run
 ```
+![screenshot](screen.png)
