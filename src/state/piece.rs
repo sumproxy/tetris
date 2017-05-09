@@ -1,4 +1,4 @@
-use super::{Inner, Template, Pos, Color, Map, MAX_ROW_COUNT};
+use super::{Inner, Template, Pos, Color, Map, MAX_COLLAPSED_ROWS};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
@@ -9,7 +9,7 @@ pub struct Piece {
 
 impl Piece {
     pub fn try_into(&self, map: &Map<Color>) -> Option<Vec<Pos>> {
-        let mut result = Vec::<Pos>::with_capacity(MAX_ROW_COUNT);
+        let mut result = Vec::<Pos>::with_capacity(MAX_COLLAPSED_ROWS);
         for delta in self.template.0.iter() {
             let dx = delta.dx + self.pos.x as isize;
             let dy = delta.dy + self.pos.y as isize;

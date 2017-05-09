@@ -12,7 +12,7 @@ use self::piece::Piece;
 use self::queue::PieceQueue;
 use self::map::{Map, Pos, Size2};
 
-const MAX_ROW_COUNT: usize = 4;
+const MAX_COLLAPSED_ROWS: usize = 4;
 
 trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
@@ -169,7 +169,7 @@ impl State {
     }
 
     fn filled_rows(&self) -> Vec<usize> {
-        let mut result = Vec::with_capacity(MAX_ROW_COUNT);
+        let mut result = Vec::with_capacity(MAX_COLLAPSED_ROWS);
         for y in 0..self.main.size().h {
             if self.is_row_filled(y) {
                 result.push(y)
