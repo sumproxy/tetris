@@ -1,13 +1,16 @@
-pub mod template;
 pub mod color;
-pub mod map;
+pub mod template;
+mod timer;
+mod piece;
+mod queue;
+mod map;
 
-use ::std::time::{Duration, Instant};
-use ::std::collections::VecDeque;
-
-use self::map::{Map, Pos, Size2};
-use self::template::{Template, DeltaPos, Kind};
 use self::color::Color;
+use self::template::{Template, DeltaPos, Kind};
+use self::timer::Timer;
+use self::piece::Piece;
+use self::queue::PieceQueue;
+use self::map::{Map, Pos, Size2};
 
 const MAX_ROW_COUNT: usize = 4;
 
@@ -18,92 +21,6 @@ trait Inner<T> {
 pub enum Visible {
     Yes,
     No,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct Piece {
-    pub template: Template,
-    pos: Pos,
-    color: Color,
-}
-
-impl Piece {
-    fn try_into(&self, map: &Map<Color>) -> Option<Vec<Pos>> {
-        let mut result = Vec::<Pos>::with_capacity(MAX_ROW_COUNT);
-        for delta in self.template.0.iter() {
-            let dx = delta.dx + self.pos.x as isize;
-            let dy = delta.dy + self.pos.y as isize;
-            if dx < 0 || dy < 0 {
-                return None;
-            }
-            let pos = Pos { x: dx as usize, y: dy as usize};
-            if map.is_inside(pos) {
-                result.push(pos);
-            }
-            else {
-                return None;
-            }
-        }
-
-        Some(result)
-    }
-
-    fn generate() -> Self {
-        Piece {
-            template: Template::generate(),
-            pos: Pos { x: 4, y: 1 },
-            color: Color::generate(),
-        }
-    }
-}
-
-pub struct Timer {
-    accumulator: Instant,
-    threshold: Duration,
-}
-
-impl Timer {
-    fn new() -> Self {
-        Timer {
-            accumulator: Instant::now(),
-            threshold: Duration::from_millis(350),
-        }
-    }
-
-    pub fn is_up(&mut self) -> bool {
-        if self.accumulator.elapsed() > self.threshold {
-            self.accumulator = Instant::now();
-            true
-        } else {
-            false
-        }
-    }
-
-    fn lower_threshold(&mut self) {
-        if self.threshold - Duration::from_millis(5) >= Duration::from_millis(100) {
-            self.threshold -= Duration::from_millis(5);
-        }
-    }
-}
-
-pub struct PieceQueue {
-    data: VecDeque<Piece>
-}
-
-impl PieceQueue {
-    fn with_capacity(size: usize) -> Self {
-        let mut data = VecDeque::<Piece>::with_capacity(size);
-        for _ in 0..3 {
-            data.push_back(Piece::generate());
-        }
-        PieceQueue { data: data }
-    }
-
-    fn next(&mut self) -> Piece {
-        let next = self.data.pop_front();
-        self.data.push_back(Piece::generate());
-        next.unwrap()
-    }
 }
 
 pub struct State {

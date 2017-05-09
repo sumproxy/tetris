@@ -5,10 +5,10 @@ extern crate winit;
 extern crate rand;
 
 mod app;
-mod common;
+mod state;
 
 use app::App;
-use common::color;
+use state::color;
 
 use winit::WindowBuilder;
 

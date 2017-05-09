@@ -4,8 +4,8 @@ use gfx_app;
 use gfx_app::ColorFormat;
 use winit::{Event, ElementState, VirtualKeyCode};
 
-use common::{State, Visible};
-use common::template::DeltaPos;
+use state::{State, Visible};
+use state::template::DeltaPos;
 use color::Color;
 
 gfx_defines!{
