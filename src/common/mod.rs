@@ -91,7 +91,7 @@ pub struct PieceQueue {
 }
 
 impl PieceQueue {
-    fn new(size: usize) -> Self {
+    fn with_capacity(size: usize) -> Self {
         let mut data = VecDeque::<Piece>::with_capacity(size);
         for _ in 0..3 {
             data.push_back(Piece::generate());
@@ -121,7 +121,7 @@ impl State {
         let mut state = State {
             main: Map::<Color>::new(Size2 { w: 10, h: 22 }),
             preview: Map::<Color>::new(Size2 { w: 4, h: 22}),
-            queue: PieceQueue::new(3),
+            queue: PieceQueue::with_capacity(3),
             piece: Piece::generate(),
             timer: Timer::new(),
             score: 0,
