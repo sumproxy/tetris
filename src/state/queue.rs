@@ -8,7 +8,7 @@ pub struct Queue<T> {
 
 impl<T: Generate> Queue<T> {
     pub fn with_capacity(size: usize) -> Self {
-        let mut data = VecDeque::<T>::with_capacity(size);
+        let mut data = VecDeque::with_capacity(size);
         for _ in 0..3 {
             data.push_back(T::generate());
         }
