@@ -138,7 +138,7 @@ impl State {
 
     pub fn hard_drop(&mut self) {
         let down = DeltaPos { dx: 0, dy: 1 };
-        while let Ok(()) = self.move_piece(down) {};
+        while self.move_piece(down).is_ok() {};
     }
 
     pub fn collapse_rows(&mut self) {
