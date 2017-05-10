@@ -7,18 +7,18 @@ extern crate rand;
 mod app;
 mod state;
 
-use app::App;
-use state::color;
-
-use winit::WindowBuilder;
+const BOX_SIZE: usize = 20;
 
 fn main() {
     use gfx_app::Application;
+    use winit::WindowBuilder;
 
+    let width = ((state::MAIN_WIDTH + state::PREVIEW_WIDTH) * BOX_SIZE) as u32;
+    let height = (state::HEIGHT * BOX_SIZE) as u32;
     let wb = WindowBuilder::new()
-        .with_min_dimensions(240, 440)
-        .with_max_dimensions(240, 440)
+        .with_min_dimensions(width, height)
+        .with_max_dimensions(width, height)
         .with_title("Tetris!");
 
-    App::launch_default(wb);
+    app::App::launch_default(wb);
 }

@@ -6,7 +6,7 @@ use winit::{Event, ElementState, VirtualKeyCode};
 
 use state::{State, Visible};
 use state::template::DeltaPos;
-use color::Color;
+use state::color::Color;
 
 gfx_defines!{
     vertex Vertex {

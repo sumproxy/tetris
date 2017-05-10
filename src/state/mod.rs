@@ -13,6 +13,9 @@ use self::queue::Queue;
 use self::map::{Map, Pos, Size2};
 
 const MAX_COLLAPSED_ROWS: usize = 4;
+pub const PREVIEW_WIDTH: usize = 4;
+pub const MAIN_WIDTH: usize = 10;
+pub const HEIGHT: usize = 22;
 
 trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
@@ -40,8 +43,8 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         let mut state = State {
-            main: Map::new(Size2 { w: 10, h: 22 }),
-            preview: Map::new(Size2 { w: 4, h: 22}),
+            main: Map::new(Size2 { w: MAIN_WIDTH, h: HEIGHT }),
+            preview: Map::new(Size2 { w: PREVIEW_WIDTH, h: HEIGHT }),
             queue: Queue::with_capacity(3),
             piece: Piece::generate(),
             timer: Timer::new(),
