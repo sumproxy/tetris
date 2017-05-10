@@ -9,13 +9,17 @@ use self::color::Color;
 use self::template::{Template, DeltaPos, Kind};
 use self::timer::Timer;
 use self::piece::Piece;
-use self::queue::PieceQueue;
+use self::queue::Queue;
 use self::map::{Map, Pos, Size2};
 
 const MAX_COLLAPSED_ROWS: usize = 4;
 
 trait Inner<T> {
     fn is_inside(&self, delta: T) -> bool;
+}
+
+pub trait Generate {
+    fn generate() -> Self where Self: Sized;
 }
 
 pub enum Visible {
@@ -26,7 +30,7 @@ pub enum Visible {
 pub struct State {
     pub main: Map<Color>,
     pub preview: Map<Color>,
-    pub queue: PieceQueue,
+    pub queue: Queue<Piece>,
     pub piece: Piece,
     pub timer: Timer,
     pub score: u64,
@@ -36,9 +40,9 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         let mut state = State {
-            main: Map::<Color>::new(Size2 { w: 10, h: 22 }),
-            preview: Map::<Color>::new(Size2 { w: 4, h: 22}),
-            queue: PieceQueue::with_capacity(3),
+            main: Map::new(Size2 { w: 10, h: 22 }),
+            preview: Map::new(Size2 { w: 4, h: 22}),
+            queue: Queue::with_capacity(3),
             piece: Piece::generate(),
             timer: Timer::new(),
             score: 0,

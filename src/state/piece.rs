@@ -1,10 +1,20 @@
-use super::{Inner, Template, Pos, Color, Map, MAX_COLLAPSED_ROWS};
+use super::{Inner, Generate, Template, Pos, Color, Map, MAX_COLLAPSED_ROWS};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
     pub template: Template,
     pub pos: Pos,
     pub color: Color,
+}
+
+impl Generate for Piece {
+    fn generate() -> Self {
+        Piece {
+            template: Template::generate(),
+            pos: Pos { x: 4, y: 1 },
+            color: Color::generate(),
+        }
+    }
 }
 
 impl Piece {
@@ -26,13 +36,5 @@ impl Piece {
         }
 
         Some(result)
-    }
-
-    pub fn generate() -> Self {
-        Piece {
-            template: Template::generate(),
-            pos: Pos { x: 4, y: 1 },
-            color: Color::generate(),
-        }
     }
 }

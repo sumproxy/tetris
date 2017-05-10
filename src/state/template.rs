@@ -1,3 +1,5 @@
+use super::Generate;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Kind {
     I, T, O, J, L, S, Z,
@@ -11,6 +13,17 @@ pub struct DeltaPos {
 
 #[derive(Clone, Copy, Debug)]
 pub struct Template(pub [DeltaPos; 4], pub Kind);
+
+impl Generate for Template {
+    fn generate() -> Self {
+        use rand;
+        use rand::Rng;
+
+        let mut rng = rand::thread_rng();
+        static TEMPLATES: [Template; 7] = [I, T, O, J, L, S, Z];
+        TEMPLATES[rng.gen_range(0, 7)]
+    }
+}
 
 impl Template {
     #[allow(dead_code)]
@@ -38,15 +51,6 @@ impl Template {
             output.dy = -input.dx;
         }
         piece
-    }
-
-    pub fn generate() -> Self {
-        use rand;
-        use rand::Rng;
-
-        let mut rng = rand::thread_rng();
-        static TEMPLATES: [Template; 7] = [I, T, O, J, L, S, Z];
-        TEMPLATES[rng.gen_range(0, 7)]
     }
 }
 

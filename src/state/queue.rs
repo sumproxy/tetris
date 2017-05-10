@@ -1,23 +1,23 @@
-use super::Piece;
+use super::Generate;
 
 use ::std::collections::VecDeque;
 
-pub struct PieceQueue {
-    pub data: VecDeque<Piece>
+pub struct Queue<T> {
+    pub data: VecDeque<T>
 }
 
-impl PieceQueue {
+impl<T: Generate> Queue<T> {
     pub fn with_capacity(size: usize) -> Self {
-        let mut data = VecDeque::<Piece>::with_capacity(size);
+        let mut data = VecDeque::<T>::with_capacity(size);
         for _ in 0..3 {
-            data.push_back(Piece::generate());
+            data.push_back(T::generate());
         }
-        PieceQueue { data: data }
+        Queue { data: data }
     }
 
-    pub fn next(&mut self) -> Piece {
+    pub fn next(&mut self) -> T {
         let next = self.data.pop_front();
-        self.data.push_back(Piece::generate());
+        self.data.push_back(T::generate());
         next.unwrap()
     }
 }
