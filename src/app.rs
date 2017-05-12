@@ -4,7 +4,7 @@ use gfx_app;
 use gfx_app::ColorFormat;
 use winit::{Event, ElementState, VirtualKeyCode};
 
-use state::{State, Visible};
+use state::{State, Visible, PREVIEW_WIDTH};
 use state::template::DeltaPos;
 use state::color::Color;
 
@@ -105,7 +105,7 @@ impl<R: gfx::Resources> gfx_app::Application<R> for App<R> {
             data.color = self.state.main.tile(pos).into();
             encoder.draw(&self.bundle.slice, &self.bundle.pso, &data);
         }
-        let offset = self.state.dim().w - 4;
+        let offset = self.state.dim().w - PREVIEW_WIDTH;
         for pos in self.state.preview.get_iter() {
             let x = ((pos.x + offset) as f32 / middle_x - 1.0) * (1.0 - box_width);
             let y = - (pos.y as f32 / middle_y - 1.0) * (1.0 - box_height);
